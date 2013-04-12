@@ -1,3 +1,4 @@
+var util = require('util');
 var msgpack = require('msgpack-js');
 var cacheControl = require('./cache_control');
 
@@ -23,7 +24,7 @@ CachingRules.prototype.checkRequest = function(env, next) {
   var requestCacheControlHeader = env.request.headers['cache-control'];
   var authorizationHeader = env.request.headers['authorization'];
   if (requestCacheControlHeader) {
-    var requestCacheControl = cacheControl(requestCacheControlHeader);
+    var requestCacheControl = cacheControl(requestCacheControlHeader, 'request');
     if (requestCacheControl.noCache || requestCacheControl.noStore || authorizationHeader) {
       env.cache.pass = true;
       next(env);
@@ -48,15 +49,22 @@ CachingRules.prototype.checkRequest = function(env, next) {
     } else {
       // TODO: Verify Vary headers.
 
-      var expires = CachingRules._calculateExpires(env);
+      console.log('env body:', env.response.body);
+      var env1 = util._extend({}, env);
+      env1.response = new (require('http').ServerResponse)(env.request);
+      Object.keys(val.headers).forEach(function(name) {
+        env1.response.setHeader(name, val.headers[name]);
+      });
+      env1.response.body = val.body;
+      console.log('env1 body:', env1.response.body);
+      console.log('env body:', env.response.body);
+      var expires = CachingRules._calculateExpires(env1);
       console.log(val.headers);
       var dateHeader = val.headers['Date'];
       var date = new Date(dateHeader);
       var age = val.headers['age'] || 0;
       var responseTime = env.cache.responseTime = Date.now();
       var receivedAge = Math.max(responseTime - date, age) || 0;
-      console.log(responseTime);
-      console.log(dateHeader);
       console.log('calc:', responseTime - date);
 
       var initialAge = receivedAge + (responseTime - env.cache.requestTime);
@@ -64,9 +72,10 @@ CachingRules.prototype.checkRequest = function(env, next) {
 
       val.headers['Age'] = Math.round((initialAge + residentTime) / 1000);
 
-      console.log('expires:', expires);
+      console.log('expires1:', expires);
       if (val.headers['Age'] >= expires) {
         env.cache.remove(env.cache.key, function(err) {
+          env.cache.pass = false;
           env.cache.cacheable = false;
           env.cache.fetch = true;
           next(env);
@@ -123,7 +132,7 @@ CachingRules.prototype.checkResponse = function(env, next) {
   var dateHeader = env.response.getHeader('date');
 
   if (!dateHeader) {
-    env.response.setHeader('Date', new Date().toUTCString());
+    env.response.setHeader('Date', utcDate());
     dateHeader = env.response.getHeader('date');
   }
 
@@ -204,5 +213,17 @@ CachingRules._calculateExpires = function(env) {
 
   return expires;
 };
+
+var dateCache;
+function utcDate() {
+  if (!dateCache) {
+    var d = new Date();
+    dateCache = d.toUTCString();
+    setTimeout(function() {
+      dateCache = undefined;
+    }, 1000 - d.getMilliseconds());
+  }
+  return dateCache;
+}
 
 module.exports = new CachingRules();

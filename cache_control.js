@@ -40,7 +40,8 @@ CacheControl.prototype._parse = function(value) {
     var val = pair[1] ? pair[1] : null;
 
     if (name && name.length) {
-      self[name.toLowerCase()] = (val || true);
+      self._assign(name.toLowerCase(), val || true);
+      //self[name.toLowerCase()] = (val || true);
     }
   });
 };
@@ -86,6 +87,6 @@ CacheControl.prototype.toString = function() {
   return this._original;
 };
 
-module.exports = function(value) {
-  return new CacheControl(value);
+module.exports = function(value, type) {
+  return new CacheControl(value, type);
 };
