@@ -65,8 +65,6 @@ CachingRules.prototype.checkRequest = function(env, next) {
         next(env);
       }
     } else {
-      // TODO: Verify Vary headers.
-
       var match = varyMatch(val.entries, env, next);
 
       if (!match) {
@@ -104,7 +102,7 @@ CachingRules.prototype.checkRequest = function(env, next) {
       if (match.response.headers['Age'] >= expires) {
         env.cache.remove(env.cache.key, function(err) {
           env.cache.pass = false;
-          env.cache.cacheable = false;
+          env.cache.cacheable = true;
           env.cache.lookup = true;
           var pipeline = env.pipeline('cache:miss');
           if (pipeline) {
@@ -293,6 +291,8 @@ CachingRules.prototype.checkResponse = function(env, next) {
         } else {
           val = { entries: [obj] };
         }
+      } else {
+        val = { entries: [obj] };
       }
 
       env.cache.put(env.cache.key, msgpack.encode(val), function(err) {

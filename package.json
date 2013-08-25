@@ -19,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "msgpack-js": "~0.1.5",
-    "argo-server": "git://github.com/argo/argo.git#master"
+    "argo": "git://github.com/argo/argo.git#master",
+    "medea": "0.0.6"
   }
 }

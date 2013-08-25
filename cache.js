@@ -45,7 +45,7 @@ var setupPackage = function(argo) {
         })
         .use(function(handle) {
           handle('request', rules.checkRequest);
-          handle('response', { sink: true }, rules.checkResponse);
+          handle('response', { affinity: 'sink' }, rules.checkResponse);
         });
     }
   };
