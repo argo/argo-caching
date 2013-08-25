@@ -33,7 +33,9 @@ var setupPackage = function(argo) {
             if (!isOpen) {
               db.open(dirname, options, function(err) {
                 isOpen = true;
-                next(env);
+                db.compact(function(err) {
+                  next(env);
+                });
               });
             } else {
               next(env);
