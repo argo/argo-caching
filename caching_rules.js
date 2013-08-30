@@ -144,11 +144,35 @@ function varyMatch(entries, env, next) {
 function varyMatchIndexOf(entries, env, next) {
   var idx = -1;
   var found = false;
+  var stars = [];
+  var varies = [];
+  var other = [];
+
   // TODO: Sort entries by Vary... *, Vary headers, no Vary header
-  for (var i = 0, len = entries.length; i < len; i++) {
+  entries.forEach(function(entry) {
+    var vary = null;
+    Object.keys(entry.response.headers).forEach(function(k) {
+      if (k.toLowerCase() === 'vary') {
+        vary = entry.response.headers[k];
+      }
+    });
+
+    if (!vary) {
+      other.push(entry);
+    } else if (vary === '*') {
+      stars.push(entry);
+    } else {
+      varies.push(entry);
+      //var headers = vary.replace(/\s/g, '').split(',').map(function(n) { return n.toLowerCase(); });
+    }
+  });
+
+  var sorted = stars.concat(varies, other);
+
+  for (var i = 0, len = sorted.length; i < len; i++) {
     if (found) continue;
 
-    var match = entries[i];
+    var match = sorted[i];
     var vary = match.response.headers['Vary'];
 
     if (vary) {

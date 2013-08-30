@@ -24,7 +24,7 @@ argo()
 
       env.response.setHeader('Cache-Control', 'public, s-maxage=20');
       env.response.setHeader('Expires', '10');
-      env.response.setHeader('Vary', 'X-Tada');
+      env.response.setHeader('Vary', 'X-Tada, Hello');
       env.response.setHeader('Content-Type', 'text/plain');
       env.response.body = 'Hello World!';
 
