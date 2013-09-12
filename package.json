@@ -2,7 +2,7 @@
   "name": "argo-http-cache",
   "version": "0.0.1",
   "description": "HTTP Caching for Argo.",
-  "main": "index.js",
+  "main": "cache.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
