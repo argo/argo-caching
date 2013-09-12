@@ -20,6 +20,6 @@
   "dependencies": {
     "msgpack-js": "~0.1.5",
     "argo": "git://github.com/argo/argo.git#master",
-    "medea": "0.0.6"
+    "medea": "0.0.7"
   }
 }
